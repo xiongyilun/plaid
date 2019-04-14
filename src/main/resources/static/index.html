@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <head>
+        <title>Getting Started: Serving Web Content</title>
+        <link rel="stylesheet" href="https://threads.plaid.com/threads.css">
+        <link rel="stylesheet" type="text/css" href="/style.css">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    </head>
+</head>
+<body>
+<h2 class="text-center">Plaid</h2>
+<hr/>
+<button id="link-button">Link Account</button>
+<button id="get-api" style="display: none">get API</button>
+<div class="item-data-row__response">
+    <table><tbody id="get-balance-data"></tbody></table>
+</div>
+</body>
+
+<script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script
+        src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script type="text/javascript">
+    (function($) {
+        var handler = Plaid.create({
+            clientName: 'Plaid Quickstart',
+            countryCodes: ['US'],
+            env: 'sandbox',
+            key: 'a3da65cc014515b2300226d16180c7',
+            product: ['transactions'],
+            onLoad: function() {
+                $('#link-button').hide();
+            },
+            onSuccess: function(public_token, metadata) {
+                $.post('/get_access_token', {
+                    public_token: public_token,
+                },function(data){
+                    $('#get-api').fadeIn('slow');
+                    console.log(data);
+                });
+            },
+            onExit: function(err, metadata) {
+                if (err != null) {
+                    // The user encountered a Plaid API error prior to exiting.
+                }
+            },
+            onEvent: function(eventName, metadata) {
+
+            }
+        });
+
+        $('#link-button').on('click', function(e) {
+            handler.open();
+        });
+
+        $('#get-api').on('click', function(e) {
+            $.get('/balance', function(data) {
+                $('#get-balance-data').slideUp(function() {
+                    var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
+                    data.forEach(function(account, idx) {
+                        html += '<tr>';
+                        html += '<td>' + account.name + '</td>';
+                        html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>'
+                        html += '<td>' + account.subtype + '</td>';
+                        html += '<td>' + account.mask + '</td>';
+                        html += '</tr>';
+                    });
+                    $(this).html(html).slideDown();
+                });
+            });
+        });
+    })(jQuery);
+</script>
+</html>
