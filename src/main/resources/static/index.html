@@ -1,11 +1,11 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <head>
         <title>Getting Started: Serving Web Content</title>
-        <link rel="stylesheet" href="https://threads.plaid.com/threads.css">
-        <link rel="stylesheet" type="text/css" href="/style.css">
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link href="https://threads.plaid.com/threads.css" rel="stylesheet">
+        <link href="/style.css" rel="stylesheet" type="text/css">
+        <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     </head>
 </head>
 <body>
@@ -13,9 +13,7 @@
 <hr/>
 <button id="link-button">Link Account</button>
 <button id="get-api" style="display: none">get API</button>
-<div class="item-data-row__response">
-    <table><tbody id="get-balance-data"></tbody></table>
-</div>
+<span id="get_account"></span>
 </body>
 
 <script
@@ -23,43 +21,52 @@
 <script
         src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script type="text/javascript">
-    (function($) {
+    (function ($) {
         var handler = Plaid.create({
             clientName: 'Plaid Quickstart',
             countryCodes: ['US'],
             env: 'sandbox',
             key: 'a3da65cc014515b2300226d16180c7',
             product: ['transactions'],
-            onLoad: function() {
-                $('#link-button').hide();
+            onLoad: function () {
+
             },
-            onSuccess: function(public_token, metadata) {
-                $.post('/get_access_token', {
+            onSuccess: function (public_token, metadata) {
+                var achResponse = {
                     public_token: public_token,
-                },function(data){
-                    $('#get-api').fadeIn('slow');
-                    console.log(data);
+                    achAccount: metadata.account,
+                    institution: metadata.institution
+                };
+                $('#link-button').hide();
+                $.ajax({
+                    url: '/get_access_token',
+                    type: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify(achResponse),
+                    success: function (data) {
+                        $("#get_account").html(JSON.stringify(data));
+                    }
                 });
             },
-            onExit: function(err, metadata) {
+            onExit: function (err, metadata) {
                 if (err != null) {
                     // The user encountered a Plaid API error prior to exiting.
                 }
             },
-            onEvent: function(eventName, metadata) {
+            onEvent: function (eventName, metadata) {
 
             }
         });
 
-        $('#link-button').on('click', function(e) {
+        $('#link-button').on('click', function (e) {
             handler.open();
         });
 
-        $('#get-api').on('click', function(e) {
-            $.get('/balance', function(data) {
-                $('#get-balance-data').slideUp(function() {
+        $('#get-api').on('click', function (e) {
+            $.get('/balance', function (data) {
+                $('#get-balance-data').slideUp(function () {
                     var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
-                    data.forEach(function(account, idx) {
+                    data.forEach(function (account, idx) {
                         html += '<tr>';
                         html += '<td>' + account.name + '</td>';
                         html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>'
