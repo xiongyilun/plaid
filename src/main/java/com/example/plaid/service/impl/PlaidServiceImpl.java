@@ -1,64 +1,56 @@
-package com.example.plaid.controller;
+package com.example.plaid.service.impl;
 
-import com.example.plaid.model.ACHAccount;
-import com.example.plaid.model.ACHResponse;
-import com.example.plaid.model.Institution;
+import com.example.plaid.service.PlaidService;
 import com.plaid.client.PlaidClient;
 import com.plaid.client.request.AuthGetRequest;
 import com.plaid.client.request.ItemPublicTokenExchangeRequest;
 import com.plaid.client.response.AuthGetResponse;
 import com.plaid.client.response.ItemPublicTokenExchangeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
 import java.io.IOException;
 import java.util.List;
 
-
-@RestController
-public class MainController {
+@Service
+public class PlaidServiceImpl implements PlaidService {
 
     @Autowired
     PlaidClient plaidClient;
 
-    @RequestMapping("/get_access_token")
-    @ResponseBody
-    public void get_access_token(@RequestBody ACHResponse achResponse) throws IOException {
+    @Override
+    public String getAccessToken(String publicToken) throws IOException {
         String accessToken = null;
-
-        ACHAccount achAccount = achResponse.getAchAccount();
-        Institution institution = achResponse.getInstitution();
-        String public_token = achResponse.getPublic_token();
-
         //获取access_token
         Response<ItemPublicTokenExchangeResponse> response = plaidClient.service()
-                .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(public_token)).execute();
+                .itemPublicTokenExchange(new ItemPublicTokenExchangeRequest(publicToken)).execute();
 
         if (response.isSuccessful()) {
             accessToken = response.body().getAccessToken();
         }
 
+        return accessToken;
+    }
+
+    @Override
+    public String getAccountNumber(String accessToken,String accountId) throws IOException {
         //获取account数据
         Response<AuthGetResponse> authGetResponse = plaidClient.service()
                 .authGet(new AuthGetRequest(accessToken)).execute();
 
         String accountNumber = null;
 
-        if (response.isSuccessful()) {
+        if (authGetResponse.isSuccessful()) {
             List<AuthGetResponse.NumberACH> numberACHList = authGetResponse.body().getNumbers().getACH();
             for (AuthGetResponse.NumberACH numberACH : numberACHList) {
-                if (numberACH.getAccountId().equals(achAccount.getId())) {
+                if (numberACH.getAccountId().equals(accountId)) {
                     accountNumber = numberACH.getAccount();
                     break;
                 }
             }
         }
 
+        return accountNumber;
     }
-
-
 }

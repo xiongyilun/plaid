@@ -22,11 +22,15 @@
         src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script type="text/javascript">
     (function ($) {
+        var publickey1 = $(publickey);
+        var env1 = publickey;
+        var products1 = products;
+
         var handler = Plaid.create({
             clientName: 'Plaid Quickstart',
             countryCodes: ['US'],
             env: 'sandbox',
-            key: 'a3da65cc014515b2300226d16180c7',
+            key: publickey1,
             product: ['transactions'],
             onLoad: function () {
 
@@ -39,7 +43,7 @@
                 };
                 $('#link-button').hide();
                 $.ajax({
-                    url: '/get_access_token',
+                    url: '/ACHAccount',
                     type: 'POST',
                     contentType: "application/json",
                     data: JSON.stringify(achResponse),
@@ -62,22 +66,6 @@
             handler.open();
         });
 
-        $('#get-api').on('click', function (e) {
-            $.get('/balance', function (data) {
-                $('#get-balance-data').slideUp(function () {
-                    var html = '<tr><td><strong>Name</strong></td><td><strong>Balance</strong></td><td><strong>Subtype</strong></td><td><strong>Mask</strong></td></tr>';
-                    data.forEach(function (account, idx) {
-                        html += '<tr>';
-                        html += '<td>' + account.name + '</td>';
-                        html += '<td>$' + (account.balances.available != null ? account.balances.available : account.balances.current) + '</td>'
-                        html += '<td>' + account.subtype + '</td>';
-                        html += '<td>' + account.mask + '</td>';
-                        html += '</tr>';
-                    });
-                    $(this).html(html).slideDown();
-                });
-            });
-        });
     })(jQuery);
 </script>
 </html>
