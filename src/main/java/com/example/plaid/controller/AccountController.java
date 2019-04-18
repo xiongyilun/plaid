@@ -2,7 +2,7 @@ package com.example.plaid.controller;
 
 import com.example.plaid.entity.BankAccount;
 import com.example.plaid.entity.BankAccountOwner;
-import com.example.plaid.entity.Embed.BankAccountOwnerId;
+import com.example.plaid.entity.embed.BankAccountOwnerId;
 import com.example.plaid.model.ACHAccount;
 import com.example.plaid.model.ACHResponse;
 import com.example.plaid.model.Institution;
@@ -86,15 +86,4 @@ public class AccountController {
         return 1;
     }
 
-    @GetMapping("/add")
-    @ResponseBody
-    public void addAccount() {
-
-    }
-
-    @GetMapping("/owner")
-    @ResponseBody
-    public void addAccountOwner() {
-
-    }
 }

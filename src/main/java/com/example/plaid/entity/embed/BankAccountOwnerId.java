@@ -1,4 +1,4 @@
-package com.example.plaid.entity.Embed;
+package com.example.plaid.entity.embed;
 
 import lombok.Getter;
 import lombok.Setter;

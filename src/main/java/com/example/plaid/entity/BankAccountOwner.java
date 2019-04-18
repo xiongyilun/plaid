@@ -1,6 +1,6 @@
 package com.example.plaid.entity;
 
-import com.example.plaid.entity.Embed.BankAccountOwnerId;
+import com.example.plaid.entity.embed.BankAccountOwnerId;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
