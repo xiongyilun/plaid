@@ -1,8 +1,13 @@
 package com.example.plaid.controller;
 
+import com.example.plaid.entity.BankAccount;
+import com.example.plaid.entity.BankAccountOwner;
+import com.example.plaid.entity.Embed.BankAccountOwnerId;
 import com.example.plaid.model.ACHAccount;
 import com.example.plaid.model.ACHResponse;
 import com.example.plaid.model.Institution;
+import com.example.plaid.service.AccountOwnerService;
+import com.example.plaid.service.AccountService;
 import com.example.plaid.service.PlaidService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +24,12 @@ public class AccountController {
 
     @Autowired
     private PlaidService plaidService;
+
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    private AccountOwnerService accountOwnerService;
 
     @Value("${plaid.publickey}")
     private String publickey;
@@ -41,24 +52,49 @@ public class AccountController {
 
         String accountNumber = plaidService.getAccountNumber(accessToken,achAccount.getId());
 
+        //保存数据进bank_account表
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setAccountName(achAccount.getName());
+        bankAccount.setAccountNumber(accountNumber);
+        bankAccount.setRoutingNumber("123123");
+        accountService.createAccount(bankAccount);
+
+        //保存数据进bank_account_owner表
+        BankAccountOwner accountOwner = new BankAccountOwner();
+        accountOwner.setId(new BankAccountOwnerId(123L, 456L));
+        accountOwnerService.createAccountOwner(accountOwner);
+
         log.info("end");
 
-        //保存数据进bank_account以及bank_account_owner表
 
     }
 
     @GetMapping("/ACHAccount")
     public String getACHAccount(Model model){
+        //查询DataAPI获取Account数据
         model.addAttribute("publickey",publickey);
         model.addAttribute("env",env);
         model.addAttribute("products",products);
+
         return "index";
     }
 
     @DeleteMapping("/ACHAccount")
     public int deleteAccount(){
+        //删除bank_account以及bank_account_owner中对应的数据
+
         return 1;
     }
 
+    @GetMapping("/add")
+    @ResponseBody
+    public void addAccount() {
 
+    }
+
+    @GetMapping("/owner")
+    @ResponseBody
+    public void addAccountOwner() {
+
+    }
 }

@@ -22,16 +22,16 @@
         src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script type="text/javascript">
     (function ($) {
-        var publickey1 = $(publickey);
-        var env1 = publickey;
-        var products1 = products;
+        var publickey = '[[${publickey}]]';
+        var env = '[[${env}]]';
+        var products = '[[${products}]]';
 
         var handler = Plaid.create({
             clientName: 'Plaid Quickstart',
             countryCodes: ['US'],
-            env: 'sandbox',
-            key: publickey1,
-            product: ['transactions'],
+            env: env,
+            key: publickey,
+            product: [products],
             onLoad: function () {
 
             },
