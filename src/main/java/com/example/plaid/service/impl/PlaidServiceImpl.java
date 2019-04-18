@@ -34,23 +34,22 @@ public class PlaidServiceImpl implements PlaidService {
     }
 
     @Override
-    public String getAccountNumber(String accessToken,String accountId) throws IOException {
+    public AuthGetResponse.NumberACH getACHAccount(String accessToken,String accountId) throws IOException {
         //获取account数据
         Response<AuthGetResponse> authGetResponse = plaidClient.service()
                 .authGet(new AuthGetRequest(accessToken)).execute();
 
-        String accountNumber = null;
-
+        AuthGetResponse.NumberACH result = null;
         if (authGetResponse.isSuccessful()) {
             List<AuthGetResponse.NumberACH> numberACHList = authGetResponse.body().getNumbers().getACH();
             for (AuthGetResponse.NumberACH numberACH : numberACHList) {
                 if (numberACH.getAccountId().equals(accountId)) {
-                    accountNumber = numberACH.getAccount();
+                    result = numberACH;
                     break;
                 }
             }
         }
 
-        return accountNumber;
+        return result;
     }
 }

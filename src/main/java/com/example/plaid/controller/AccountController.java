@@ -9,6 +9,7 @@ import com.example.plaid.model.Institution;
 import com.example.plaid.service.AccountOwnerService;
 import com.example.plaid.service.AccountService;
 import com.example.plaid.service.PlaidService;
+import com.plaid.client.response.AuthGetResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,18 +51,20 @@ public class AccountController {
 
         String accessToken = plaidService.getAccessToken(public_token);
 
-        String accountNumber = plaidService.getAccountNumber(accessToken,achAccount.getId());
+        AuthGetResponse.NumberACH account = plaidService.getACHAccount(accessToken,achAccount.getId());
 
         //保存数据进bank_account表
         BankAccount bankAccount = new BankAccount();
         bankAccount.setAccountName(achAccount.getName());
-        bankAccount.setAccountNumber(accountNumber);
-        bankAccount.setRoutingNumber("123123");
-        accountService.createAccount(bankAccount);
+        bankAccount.setAccountNumber(account.getAccount());
+        bankAccount.setRoutingNumber(account.getRouting());
+        bankAccount.setRemittanceType(achAccount.getType());
+        bankAccount.setBankName(institution.getName());
+        BankAccount account1 = accountService.createAccount(bankAccount);
 
         //保存数据进bank_account_owner表
         BankAccountOwner accountOwner = new BankAccountOwner();
-        accountOwner.setId(new BankAccountOwnerId(123L, 456L));
+        accountOwner.setId(new BankAccountOwnerId(123L, account1.getBankAccountId()));
         accountOwnerService.createAccountOwner(accountOwner);
 
         log.info("end");
